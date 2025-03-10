@@ -18,7 +18,6 @@ def generate_daily_summary(file, move_source: bool = True) -> None:
     daily = daily.rename({"valid_time": "time"})
     daily = daily.resample(time="1D")
 
-    # for var in ["t_min", "t_max", "t_mean"]:
     for var in summary_variables:
         if var == "t_min":
             daily_summary = daily.min()
