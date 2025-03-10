@@ -15,3 +15,4 @@ class Directories(Enum):
     data_era: Path = data / "era5"
     data_era_hourly: Path = data_era / "hourly_temperature_2m"
     data_era_daily_summaries: Path = data_era / "era5_land_daily_summary"
+    data_era_quantiles: Path = data_era / "era5_land_daily_quantiles"
