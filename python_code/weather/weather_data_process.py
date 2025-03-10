@@ -32,7 +32,9 @@ def generate_daily_summary(file, move_source: bool = True) -> None:
         year = file.name.split("-")[0]
         month = file.name.split("-")[1].split("_")[0]
 
-        summary_file = Directories.data_era_daily_summaries.value / year / var
+        summary_file = (
+            Directories.data_era_daily_summaries.value / year / var.split("_")[1]
+        )
         summary_file.mkdir(parents=True, exist_ok=True)
 
         summary_file = summary_file / f"era5-land_global_daily_{var}_{year}{month}.nc"
@@ -64,7 +66,7 @@ def generate_list_of_files_to_process():
         summary_file = (
             Directories.data_era_daily_summaries.value
             / year
-            / var
+            / var.split("_")[1]
             / f"era5-land_global_daily_{var}_{year}{month}.nc"
         )
 

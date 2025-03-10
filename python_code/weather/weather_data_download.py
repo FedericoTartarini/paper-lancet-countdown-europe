@@ -128,7 +128,7 @@ if __name__ == "__main__":
     #     print(file_info)
     #     download(info=file_info, only_europe=False)
 
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=6) as executor:
         futures = [
             executor.submit(download, file_info, only_europe=False)
             for file_info in list_of_m_files

@@ -7,6 +7,9 @@ class Variables(Enum):
     year_report: int = datetime.now().year
     year_max_analysis: int = year_report - 1
     year_min_analysis: int = 1980
+    year_reference_start: int = 1991
+    year_reference_end: int = 2000
+    quantiles = [0.95]
 
 
 class Directories(Enum):
