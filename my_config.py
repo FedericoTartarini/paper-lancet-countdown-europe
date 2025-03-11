@@ -14,6 +14,7 @@ class Variables(Enum):
 
 class Directories(Enum):
     main: Path = Path("/Users/ftar3919/Documents/lancet_countdown_europe")
+    gadi: Path = Path("/home/562/ft8695/lancet_countdown_europe")
     data: Path = main / "data"
     data_era: Path = data / "era5"
     data_era_hourly: Path = data_era / "hourly_temperature_2m"
