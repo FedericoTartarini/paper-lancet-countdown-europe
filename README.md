@@ -23,9 +23,18 @@ To download the data you need to:
 2. Download the data using [weather_data_download.py](python_code/weather/weather_data_download.py)
 3. Preprocess the data using [weather_data_process.py](python_code/weather/weather_data_process.py)
 4. Calculate the quantiles using [calculate_quantiles.py](python_code/weather/calculate_quantiles.py)
-
-## To implement
 5. Calculate the heatwaves occurrences using [calculate_heatwaves.py](python_code/weather/calculate_heatwaves.py)
+
+# To implement
+## Population data
+- [ ] Download the data.
+- [ ] Process the data, for example, regrid the data to the ERA5 grid.
+- [ ] Combine the age groups.
+- [ ] Generate the rasterized data.
+- [ ] Calculate the exposure to heatwaves.
+- [ ] Calculate the change in exposure to heatwaves.
+- [ ] Calculate the exposure due to climate change and pop growth.
+- [ ] Generate most of the results.
 
 ## NCI super computer
 Guide to connect to the NCI super computer and copy the files. https://opus.nci.org.au/spaces/Help/pages/12583143/How+to+login+to+Gadi

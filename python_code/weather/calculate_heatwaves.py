@@ -126,7 +126,7 @@ def heatwaves_days_multi_threshold(datasets_year, thresholds, days_threshold: in
         threshold_exceeded = np.logical_and(threshold_exceeded, _data_year > _thresh)
 
     # Keep only the numpy array
-    # threshold_exceeded = threshold_exceeded.values
+    threshold_exceeded = threshold_exceeded.values
 
     # pre allocate arrays
     out_shape: tuple = threshold_exceeded.shape[1:]
@@ -189,7 +189,7 @@ def ds_for_year(year):
 
     temperature_files.sort()
     ds = xr.open_mfdataset(temperature_files)
-    ds = ds.drop("time_bnds")
+    ds = ds.drop_vars("time_bnds")
     ds = ds.transpose("time", "latitude", "longitude")
     return ds
 
