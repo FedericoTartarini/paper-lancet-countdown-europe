@@ -5,14 +5,14 @@ import xarray as xr
 from dask.diagnostics import ProgressBar
 from icecream import ic
 
-from my_config import Directories, Variables
+from my_config import Dirs, Variables
 
 if __name__ == "__main__":
 
     for t_var in ["t_max", "t_min"]:
 
         file_list = []
-        for file in Directories.data_era_daily_summaries.value.rglob("*.nc"):
+        for file in Dirs.data_era_daily_summaries.value.rglob("*.nc"):
             file = Path(file)
 
             year = int(file.parts[-3])
@@ -38,7 +38,7 @@ if __name__ == "__main__":
         daily_temperatures = daily_temperatures.chunk({"time": -1})
 
         climatology_quantiles = (
-            Directories.data_era_quantiles.value
+            Dirs.data_era_quantiles.value
             / f'daily_{t_var}_quantiles_{"_".join([str(int(100*q)) for q in Variables.quantiles.value])}_{Variables.year_reference_start.value}-{Variables.year_reference_end.value}.nc'
         )
 

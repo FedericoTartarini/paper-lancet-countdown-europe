@@ -2,7 +2,7 @@ import cdsapi
 from icecream import ic
 from concurrent.futures import ThreadPoolExecutor
 
-from my_config import Directories, Variables
+from my_config import Dirs, Variables
 from python_code.secrets import copernicus_api_key
 
 
@@ -109,10 +109,9 @@ def generate_list_of_monthly_files_download():
     for y in range(Variables.year_min_analysis.value, Variables.year_report.value):
         for m in range(1, 13):
             out_file = (
-                Directories.data_era_hourly.value
-                / f"{y}-{str(m).zfill(2)}_temperature.nc"
+                Dirs.data_era_hourly.value / f"{y}-{str(m).zfill(2)}_temperature.nc"
             )
-            summary_file = Directories.data_era_daily_summaries.value / str(y)
+            summary_file = Dirs.data_era_daily_summaries.value / str(y)
 
             if not out_file.exists() and not summary_file.exists():
                 ic(f"File missing: {y} and month: {str(m).zfill(2)}")

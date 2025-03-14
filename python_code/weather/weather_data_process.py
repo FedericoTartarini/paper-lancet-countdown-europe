@@ -6,7 +6,7 @@ import xarray as xr
 from icecream import ic
 from tqdm import tqdm
 
-from my_config import Directories
+from my_config import Dirs
 
 
 summary_variables = ["t_max", "t_min", "t_mean"]
@@ -32,9 +32,7 @@ def generate_daily_summary(file, move_source: bool = True) -> None:
         year = file.name.split("-")[0]
         month = file.name.split("-")[1].split("_")[0]
 
-        summary_file = (
-            Directories.data_era_daily_summaries.value / year / var.split("_")[1]
-        )
+        summary_file = Dirs.data_era_daily_summaries.value / year / var.split("_")[1]
         summary_file.mkdir(parents=True, exist_ok=True)
 
         summary_file = summary_file / f"era5-land_global_daily_{var}_{year}{month}.nc"
@@ -56,7 +54,7 @@ def generate_daily_summary(file, move_source: bool = True) -> None:
 
 def generate_list_of_files_to_process():
     list_of_files = []
-    for file in glob.glob(str(Directories.data_era_hourly.value) + "/*.nc"):
+    for file in glob.glob(str(Dirs.data_era_hourly.value) + "/*.nc"):
 
         file = Path(file)
         year = file.name.split("-")[0]
@@ -64,7 +62,7 @@ def generate_list_of_files_to_process():
 
         var = summary_variables[0]
         summary_file = (
-            Directories.data_era_daily_summaries.value
+            Dirs.data_era_daily_summaries.value
             / year
             / var.split("_")[1]
             / f"era5-land_global_daily_{var}_{year}{month}.nc"

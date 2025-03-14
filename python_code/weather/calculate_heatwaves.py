@@ -28,9 +28,10 @@ and the outputs are in the end pretty small (<50MB in Float32)}."""
 import numpy as np
 import pandas as pd
 import xarray as xr
+from icecream import ic
 from joblib import Parallel, delayed
 
-from my_config import Variables, Directories
+from my_config import Variables, Dirs
 
 xr.set_options(keep_attrs=True)
 
@@ -183,13 +184,16 @@ def heatwaves_days_multi_threshold(datasets_year, thresholds, days_threshold: in
 def ds_for_year(year):
     temperature_files = []
 
-    for p in Directories.data_era_daily_summaries.value.glob("*"):
+    for p in Dirs.data_era_daily_summaries.value.glob("*"):
         if str(year) in p.parts:
             temperature_files += [p for p in p.rglob("*.nc")]
 
     temperature_files.sort()
     ds = xr.open_mfdataset(temperature_files)
-    ds = ds.drop_vars("time_bnds")
+    try:
+        ds = ds.drop_vars("time_bnds")
+    except ValueError:
+        pass
     ds = ds.transpose("time", "latitude", "longitude")
     return ds
 
@@ -197,7 +201,11 @@ def ds_for_year(year):
 def apply_func_for_file(func, year, t_thresholds, t_var_names, days_threshold=2):
     ds = ds_for_year(year)
 
-    datasets_year = [ds[name] for name in t_var_names]
+    try:
+        datasets_year = [ds[name] for name in t_var_names]
+    except KeyError:
+        datasets_year = [ds[name] for name in ["t_min", "t_max"]]
+
     result = func(datasets_year, t_thresholds, days_threshold)
 
     # Add a year dimension matching the input file
@@ -217,6 +225,7 @@ def apply_func_and_save(
 ):
     output_file = output_folder / filename_pattern.format(year=year)
     if output_file.exists() is False and overwrite is False:
+        ic("Processing", year)
         year, result = apply_func_for_file(
             func,
             year,
@@ -271,7 +280,7 @@ def apply_func_and_save_yearly(
 
 
 if __name__ == "__main__":
-    quantiles_files = list(Directories.data_era_quantiles.value.rglob("*.nc"))
+    quantiles_files = list(Dirs.data_era_quantiles.value.rglob("*.nc"))
     t_quantiles = xr.open_mfdataset(quantiles_files, compat="override")
 
     quantile = Variables.quantiles.value[0]
@@ -296,11 +305,11 @@ if __name__ == "__main__":
     #     for year, _ in temperature_files
     # )
 
-    res = Parallel(n_jobs=6, verbose=3)(
+    res = Parallel(n_jobs=3, verbose=3)(
         delayed(apply_func_and_save)(
             heatwaves_days_multi_threshold,
             year,
-            Directories.data_era_heatwaves_days.value,
+            Dirs.data_era_heatwaves_days.value,
             t_thresholds,
             ["tmin", "tmax"],
         )
@@ -309,11 +318,11 @@ if __name__ == "__main__":
         )
     )
 
-    res = Parallel(n_jobs=5, verbose=2)(
+    res = Parallel(n_jobs=3, verbose=2)(
         delayed(apply_func_and_save)(
             heatwaves_counts_multi_threshold,
             year,
-            Directories.data_era_heatwaves_counts.value,
+            Dirs.data_era_heatwaves_counts.value,
             t_thresholds,
             ["tmin", "tmax"],
         )
