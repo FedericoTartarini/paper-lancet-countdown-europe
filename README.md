@@ -44,6 +44,7 @@ Guide to connect to the NCI super computer and copy the files. https://opus.nci.
 
 1. Connect to the NCI super computer `ssh ft8695@gadi.nci.org.au`
 2. Copy the files over `scp /Users/ftar3919/Documents/lancet_countdown_europe/data/era5/era5_land_daily_summary/1991/max/era5-land_global_daily_tmax_199101.nc ft8695@gadi-dm.nci.org.au:/home/562/ft8695/lancet_countdown_europe/data/era5/era5_land_daily_summary/1991/max/`
+3. Install conda modules `/home/562/ft8695/miniconda3/bin/conda install icecream`
 
 # Other info
 To update the list of dependencies use:

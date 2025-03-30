@@ -25,6 +25,7 @@ class Variables(Enum):
 
 class Dirs(Enum):
     main: Path = Path("/Users/ftar3919/Documents/lancet_countdown_europe")
+    adp: Path = Path("/mnt/scratch/frederico/lancet_countdown_europe")
     gadi: Path = Path("/home/562/ft8695/lancet_countdown_europe")
     results: Path = main / "results" / str(Variables.year_report.value)
     results_interim: Path = results / "interim"
