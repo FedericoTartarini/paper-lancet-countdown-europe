@@ -29,22 +29,8 @@ To download the data you need to:
 1. Use the file [shapes_to_grid.py](python_code/calculations/shapes_to_grid.py) to convert the shapefiles to grids.
 
 # To implement
-- [ ] Calculate the heatwaves days for years > 2020 since the code is breaking.
-- [x] Download population the data.
-- [x] Process population data, for example, regrid the data to the ERA5 grid.
-- [x] Combine the age groups.
-- [x] Generate the rasterized data.
-- [ ] Calculate the exposure to heatwaves.
-- [ ] Calculate the change in exposure to heatwaves.
 - [ ] Calculate the exposure due to climate change and pop growth.
 - [ ] Generate most of the results.
-
-## NCI super computer
-Guide to connect to the NCI super computer and copy the files. https://opus.nci.org.au/spaces/Help/pages/12583143/How+to+login+to+Gadi
-
-1. Connect to the NCI super computer `ssh ft8695@gadi.nci.org.au`
-2. Copy the files over `scp /Users/ftar3919/Documents/lancet_countdown_europe/data/era5/era5_land_daily_summary/1991/max/era5-land_global_daily_tmax_199101.nc ft8695@gadi-dm.nci.org.au:/home/562/ft8695/lancet_countdown_europe/data/era5/era5_land_daily_summary/1991/max/`
-3. Install conda modules `/home/562/ft8695/miniconda3/bin/conda install icecream`
 
 # Other info
 To update the list of dependencies use:

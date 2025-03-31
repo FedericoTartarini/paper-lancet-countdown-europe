@@ -25,6 +25,8 @@ output corresponding to each publication, so that it's easy to go back later to 
 results. Additionally, generating one file per year means you have a folder full of files that are harder to share,
 and the outputs are in the end pretty small (<50MB in Float32)}."""
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -199,12 +201,24 @@ def ds_for_year(year):
 
 
 def apply_func_for_file(func, year, t_thresholds, t_var_names, days_threshold=2):
+    """
+    year: int = 2023
+    """
     ds = ds_for_year(year)
 
     try:
-        datasets_year = [ds[name] for name in t_var_names]
-    except KeyError:
-        datasets_year = [ds[name] for name in ["t_min", "t_max"]]
+        ds = ds.rename({"t_min": "tmin", "t_max": "tmax"})
+    except:
+        pass
+
+    array_ds = [ds[name] for name in t_var_names]
+
+    datasets_year = []
+    for data in array_ds:
+        data["latitude"] = data["latitude"].astype("float32")
+        data["longitude"] = data["longitude"].astype("float32")
+        data = data.chunk({"time": 1, "latitude": 1801, "longitude": 3600})
+        datasets_year.append(data.drop_attrs())
 
     result = func(datasets_year, t_thresholds, days_threshold)
 
@@ -224,12 +238,12 @@ def apply_func_and_save(
     filename_pattern="indicator_{year}.nc",
 ):
     output_file = output_folder / filename_pattern.format(year=year)
-    if output_file.exists() is False and overwrite is False:
+    if not output_file.exists() or overwrite:
         ic("Processing", year)
         year, result = apply_func_for_file(
-            func,
-            year,
-            t_thresholds,
+            func=func,
+            year=year,
+            t_thresholds=t_thresholds,
             t_var_names=t_var_names,
             days_threshold=days_threshold,
         )
@@ -281,6 +295,16 @@ def apply_func_and_save_yearly(
 
 if __name__ == "__main__":
     quantiles_files = list(Dirs.data_era_quantiles.value.rglob("*.nc"))
+    quantiles_files = [
+        x
+        for x in quantiles_files
+        if str(Variables.year_reference_end.value) in x.parts[-1]
+    ]
+    quantiles_files = [
+        x
+        for x in quantiles_files
+        if str(Variables.year_reference_start.value) in x.parts[-1]
+    ]
     t_quantiles = xr.open_mfdataset(quantiles_files, compat="override")
 
     quantile = Variables.quantiles.value[0]
@@ -305,7 +329,7 @@ if __name__ == "__main__":
     #     for year, _ in temperature_files
     # )
 
-    res = Parallel(n_jobs=3, verbose=3)(
+    res = Parallel(n_jobs=2, verbose=3)(
         delayed(apply_func_and_save)(
             heatwaves_days_multi_threshold,
             year,
@@ -318,7 +342,7 @@ if __name__ == "__main__":
         )
     )
 
-    res = Parallel(n_jobs=3, verbose=2)(
+    res = Parallel(n_jobs=2, verbose=2)(
         delayed(apply_func_and_save)(
             heatwaves_counts_multi_threshold,
             year,
