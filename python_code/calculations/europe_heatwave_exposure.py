@@ -44,7 +44,7 @@ def get_nuts_2021():
     return nuts_2021
 
 
-def get_nuts_level_2():
+def get_nuts_level_2(return_bounds_slices=False):
     nuts = gpd.read_file(
         Dirs.shapefiles.value / "NUTS_RG_03M_2016_4326 clipped.geojson.zip"
     )
@@ -54,6 +54,13 @@ def get_nuts_level_2():
         .apply(lambda b: np.frombuffer(b, dtype=">u4")[0])
         .astype(np.uint32)
     )
+    nuts_bounds = nuts.geometry.total_bounds
+    lat_slice = slice(nuts_bounds[3], nuts_bounds[1])
+    lon_slice = slice(nuts_bounds[0], nuts_bounds[2])
+
+    if return_bounds_slices:
+        return nuts, nuts2, nuts_bounds, lat_slice, lon_slice
+
     return nuts, nuts2
 
 
@@ -125,18 +132,15 @@ def calculate_heatwave_days():
     heatwave_days = xr.open_mfdataset(hw_file)
 
     # NUTS shapefiles
-    nuts = gpd.read_file(
-        Dirs.shapefiles.value / "NUTS_RG_03M_2016_4326 clipped.geojson.zip"
+    nuts, _, nuts_bounds, lat_slice, lon_slice = get_nuts_level_2(
+        return_bounds_slices=True
     )
-    nuts_bounds = nuts.geometry.total_bounds
 
     # Subset the weather data
     # NOTE: since input data is 'image style' it's indexed from top-left so latitude is in decreasing order and lat
     # label ranges need to be in order [max val: min val]
     # NOTE: since we cross 0 longitude and ERA data is on 0-360 grid
     # need to stitch together a new dataset and change coords to be on -180 to 180
-
-    lat_slice = slice(nuts_bounds[3], nuts_bounds[1])
 
     lon_slice1 = slice(360 + nuts_bounds[0], 360)
     lon_slice2 = slice(0, nuts_bounds[2])
@@ -249,14 +253,9 @@ def re_grid_population():
     population_dense_file = (
         Dirs.data_pop_gpw.value / "gpw_v4_population_density_adjusted_rev11_2pt5_min.nc"
     )
-
-    population_layers_file = (
-        Dirs.data_pop_gpw.value / "gpw_v4_netcdf_contents_rev11.csv"
-    )
     population_var = "UN WPP-Adjusted Population Count, v4.11 (2000, 2005, 2010, 2015, 2020): 2.5 arc-minutes"
     dense_var = "UN WPP-Adjusted Population Density, v4.11 (2000, 2005, 2010, 2015, 2020): 2.5 arc-minutes"
 
-    layer_data = pd.read_csv(population_layers_file).set_index("file_name")
     population = xr.open_dataset(population_file)
     population_dense = xr.open_dataset(population_dense_file)
 
@@ -267,10 +266,9 @@ def re_grid_population():
     # the 30second data (1km) using just grouping of points without fancy regrid, but it's a ton of extra data to mess
     # with.
     # NUTS shapefiles
-    nuts, _ = get_nuts_level_2()
-    nuts_bounds = nuts.geometry.total_bounds
-    lat_slice = slice(nuts_bounds[3], nuts_bounds[1])
-    lon_slice = slice(nuts_bounds[0], nuts_bounds[2])
+    nuts, _, nuts_bounds, lat_slice, lon_slice = get_nuts_level_2(
+        return_bounds_slices=True
+    )
 
     heatwave_days_delta_eu = xr.open_dataset(
         Dirs.results_interim.value / "heatwave_days_delta_eu.nc", decode_cf=True
@@ -350,10 +348,9 @@ def demographics_gpw_nuts_weighted():
 
     pop_regrid = xr.open_dataset(Dirs.results_interim.value / "population_regridded.nc")
 
-    nuts, nuts2 = get_nuts_level_2()
-    nuts_bounds = nuts.geometry.total_bounds
-    lat_slice = slice(nuts_bounds[3], nuts_bounds[1])
-    lon_slice = slice(nuts_bounds[0], nuts_bounds[2])
+    nuts, nuts2, nuts_bounds, lat_slice, lon_slice = get_nuts_level_2(
+        return_bounds_slices=True
+    )
 
     # Regrid GPW demographics, From the info file, over-65s is layer 15
     # todo need to get the new demographics file
