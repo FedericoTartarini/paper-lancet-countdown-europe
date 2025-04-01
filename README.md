@@ -28,7 +28,10 @@ To download the data you need to:
 ## Shapes to grids
 1. Use the file [shapes_to_grid.py](python_code/calculations/shapes_to_grid.py) to convert the shapefiles to grids.
 
-# To implement
+## Generate the results
+1. Use the file [europe_heatwave_exposure.py](python_code/calculations/europe_heatwave_exposure.py) to generate the results.
+
+## TODO
 - [ ] Get the new demographic file.
 
 # Other info

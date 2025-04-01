@@ -120,15 +120,9 @@ def prep_eurostat_table(data):
 
 
 def calculate_heatwave_days():
+    # import data
     hw_file = sorted(Dirs.data_era_heatwaves_days.value.glob("*.nc"))
     heatwave_days = xr.open_mfdataset(hw_file)
-
-    heatwaves_days_reference = heatwave_days.sel(
-        year=slice(
-            Variables.year_reference_start.value, Variables.year_reference_end.value
-        )
-    ).mean(dim="year")
-    heatwave_days_delta = heatwave_days - heatwaves_days_reference
 
     # NUTS shapefiles
     nuts = gpd.read_file(
@@ -143,10 +137,17 @@ def calculate_heatwave_days():
     # need to stitch together a new dataset and change coords to be on -180 to 180
 
     lat_slice = slice(nuts_bounds[3], nuts_bounds[1])
-    lon_slice = slice(nuts_bounds[0], nuts_bounds[2])
 
     lon_slice1 = slice(360 + nuts_bounds[0], 360)
     lon_slice2 = slice(0, nuts_bounds[2])
+
+    # analyze the heatwave days
+    heatwaves_days_reference = heatwave_days.sel(
+        year=slice(
+            Variables.year_reference_start.value, Variables.year_reference_end.value
+        )
+    ).mean(dim="year")
+    heatwave_days_delta = heatwave_days - heatwaves_days_reference
 
     part1 = heatwave_days_delta.sel(latitude=lat_slice, longitude=lon_slice1)
     part1["longitude"] = part1.longitude - 360
@@ -166,16 +167,17 @@ def calculate_heatwave_days():
         Dirs.results_interim.value / "heatwave_days_delta_eu.nc"
     )
 
+    part1 = heatwave_days.sel(latitude=lat_slice, longitude=lon_slice1)
+    part1["longitude"] = part1.longitude - 360
+
     heatwave_days_eu = xr.concat(
         [
-            #     heatwave_days_delta.sel(latitude=lat_slice, longitude=lon_slice1),
             part1,
             heatwave_days.sel(latitude=lat_slice, longitude=lon_slice2),
         ],
         "longitude",
     ).load()
 
-    # todo this plot is strange, need to check
     heatwave_days_eu.heatwaves_days.mean(dim="year").plot()
     plt.show()
 
