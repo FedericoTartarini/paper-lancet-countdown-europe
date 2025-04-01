@@ -191,23 +191,17 @@ def nuts2_id_as_int():
     )
 
     # Generate NUTS code grid
-    """
-    - split out each NUTS level
-    - assign numeric code
-    - burn to grid based on ref grid
-    """
+    # - split out each NUTS level
+    # - assign numeric code
+    # - burn to grid based on ref grid
     nuts, nuts2 = get_nuts_level_2()
     north = heatwave_days_delta_eu.latitude[0].item()
     west = heatwave_days_delta_eu.longitude[0].item()
 
-    ysize = -(
-        heatwave_days_delta_eu.latitude[1] - heatwave_days_delta_eu.latitude[0]
-    ).item()
-    xsize = (
-        heatwave_days_delta_eu.longitude[1] - heatwave_days_delta_eu.longitude[0]
-    ).item()
+    y_grid_size = north - heatwave_days_delta_eu.latitude[1].item()
+    x_grid_size = heatwave_days_delta_eu.longitude[1].item() - west
 
-    transform = rasterio.transform.from_origin(west, north, xsize, ysize)
+    transform = rasterio.transform.from_origin(west, north, x_grid_size, y_grid_size)
 
     image = features.rasterize(
         [(row.geometry, row.id_as_int) for idx, row in nuts2.iterrows()],
@@ -252,7 +246,6 @@ def re_grid_population():
     population_file = (
         Dirs.data_pop_gpw.value / "gpw_v4_population_count_adjusted_rev11_2pt5_min.nc"
     )
-
     population_dense_file = (
         Dirs.data_pop_gpw.value / "gpw_v4_population_density_adjusted_rev11_2pt5_min.nc"
     )
