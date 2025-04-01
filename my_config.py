@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 # Figure settings
 plt.rcParams["figure.dpi"] = 120
 plt.rcParams["savefig.dpi"] = 300
-plt.rcParams["figure.figsize"] = (5, 2.5)
+plt.rcParams["figure.figsize"] = (7, 4)
 plt.rcParams["figure.titlesize"] = "medium"
 plt.rcParams["axes.titlesize"] = "medium"
 plt.rcParams["savefig.bbox"] = "tight"
@@ -18,6 +18,8 @@ class Variables(Enum):
     year_report: int = datetime.now().year
     year_max_analysis: int = year_report - 1
     year_min_analysis: int = 1980
+    year_min_comparison: int = 2015
+    year_max_comparison: int = year_max_analysis
     year_reference_start: int = 1991
     year_reference_end: int = 2000
     quantiles = [0.95]

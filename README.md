@@ -29,8 +29,7 @@ To download the data you need to:
 1. Use the file [shapes_to_grid.py](python_code/calculations/shapes_to_grid.py) to convert the shapefiles to grids.
 
 # To implement
-- [ ] Calculate the exposure due to climate change and pop growth.
-- [ ] Generate most of the results.
+- [ ] Get the new demographic file.
 
 # Other info
 To update the list of dependencies use:
