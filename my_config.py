@@ -46,7 +46,7 @@ class Dirs(Enum):
     data_era_quantiles: Path = data_era / "era5_land_daily_quantiles"
     shapefiles: Path = main / "shapefiles"
     rasters: Path = Path(os.getcwd()) / "data" / "rasters"
-    figures: Path = Path(os.getcwd()) / "figures"
+    figures: Path = results / "figures"
     figures_test: Path = figures / "test"
 
 
@@ -56,3 +56,4 @@ if __name__ == "__main__":
     Dirs.results.value.mkdir(exist_ok=True, parents=True)
     Dirs.results_interim.value.mkdir(exist_ok=True, parents=True)
     Dirs.data_pop_gpw.value.mkdir(exist_ok=True, parents=True)
+    Dirs.figures.value.mkdir(exist_ok=True, parents=True)
