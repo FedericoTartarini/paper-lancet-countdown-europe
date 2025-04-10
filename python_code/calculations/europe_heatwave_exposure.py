@@ -368,9 +368,17 @@ def re_grid_population():
 
     # Interpolate pop counts to get yearly
     pop_regrid = pop_regrid.interp(
-        {"year": np.arange(2000, Variables.year_report.value)},
+        {
+            "year": np.arange(
+                Variables.year_reference_start.value, Variables.year_report.value
+            )
+        },
         kwargs=dict(fill_value="extrapolate"),
     )
+
+    f, ax = plt.subplots(constrained_layout=True)
+    pop_regrid.mean(dim=["latitude", "longitude"]).plot(ax=ax)
+    plt.show()
 
     f, ax = plt.subplots(constrained_layout=True)
     pop_regrid.sel(year=Variables.year_max_analysis.value).plot(robust=True, ax=ax)
@@ -446,7 +454,11 @@ def demographics_gpw_nuts_weighted():
     ).drop_vars("age_group")
 
     eu_demog_f = eu_demog_f.interp(
-        {"year": np.arange(2000, Variables.year_report.value)},
+        {
+            "year": np.arange(
+                Variables.year_reference_start.value, Variables.year_report.value
+            )
+        },
         kwargs=dict(fill_value="extrapolate"),
     )
 
@@ -548,7 +560,11 @@ def calculate_infants():
     eu_infants_x = eu_infants.to_xarray().to_array("year")
 
     eu_infants_x = eu_infants_x.interp(
-        {"year": np.arange(2000, Variables.year_report.value)},
+        {
+            "year": np.arange(
+                Variables.year_reference_start.value, Variables.year_report.value
+            )
+        },
         kwargs=dict(fill_value="extrapolate"),
     )
     infants = xr.DataArray(
