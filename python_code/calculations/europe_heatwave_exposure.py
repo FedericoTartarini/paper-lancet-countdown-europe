@@ -718,8 +718,8 @@ def calculate_exposures_nuts_2021():
     nuts_exposures = {}
     nuts_exposures_norm = {}
 
-    heatwave_days_eu = heatwave_days_eu.heatwaves_days
-    hw_exposure = hw_exposure.heatwaves_days
+    # heatwave_days_eu = heatwave_days_eu.heatwaves_days
+    # hw_exposure = hw_exposure.heatwaves_days
 
     for nuts_code, row in tqdm(nuts_2021.iterrows(), total=len(nuts_2021)):
         mask = raster_nuts_2021_grid == row.id_as_int
@@ -787,15 +787,15 @@ def calculate_exposures_nuts_2021():
     vuln_demog.to_netcdf(
         Dirs.results_interim.value / "vulnerability_demographics_by_nuts2021.nc"
     )
-    # summary_change.to_dataframe().reset_index().to_csv(
-    #     Dirs.results.value / "exposure_change_by_nuts2021.csv"
-    # )
-    # nuts_exposures.to_dataframe().reset_index().to_csv(
-    #     Dirs.results.value / "exposure_totals_by_nuts2021.csv"
-    # )
-    # nuts_exposures_norm.to_dataframe().reset_index().to_csv(
-    #     Dirs.results.value / "exposure_norm_by_nuts2021.csv"
-    # )
+    summary_change.to_dataframe().reset_index().to_csv(
+        Dirs.results.value / "exposure_change_by_nuts2021.csv"
+    )
+    nuts_exposures.to_dataframe().reset_index().to_csv(
+        Dirs.results.value / "exposure_totals_by_nuts2021.csv"
+    )
+    nuts_exposures_norm.to_dataframe().reset_index().to_csv(
+        Dirs.results.value / "exposure_norm_by_nuts2021.csv"
+    )
 
 
 def plot_heatwave_exposure():
@@ -833,9 +833,21 @@ def plot_heatwave_exposure():
         .unstack()
         .T.loc["exposures"]
     )
-    (plot_data.LT_1 / 1e6).plot.bar(ax=axs[0])
+    plot_data_inf = plot_data.LT_1 / 1e6
+    plot_data_inf_baseline = plot_data_inf[
+        plot_data_inf.index <= Variables.year_reference_end.value
+    ]
+    plot_data_inf.plot.bar(ax=axs[0])
+    plot_data_inf_baseline.plot.bar(ax=axs[0], color="lightblue")
     axs[0].set(title="Infants", ylabel="", xlabel="Year")
-    (plot_data.GT_65 / 1e6).plot.bar(ax=axs[1])
+    axs[0].grid(ls="--", color="lightgrey", linewidth=0.5, axis="y")
+
+    plot_data_old = plot_data.GT_65 / 1e6
+    plot_data_old_baseline = plot_data_old[
+        plot_data_old.index <= Variables.year_reference_end.value
+    ]
+    plot_data_old.plot.bar(ax=axs[1])
+    plot_data_old_baseline.plot.bar(ax=axs[1], color="lightblue")
     axs[1].set(title="Over 65", ylabel="", xlabel="Year")
     plt.tight_layout(rect=(0.02, 0, 1, 1))
     f.text(
@@ -845,6 +857,10 @@ def plot_heatwave_exposure():
         va="center",
         rotation="vertical",
     )
+    axs[1].set_xlim(-0.5, plot_data.shape[0] + 0.5)
+    axs[1].set_xticks(np.arange(0, plot_data.shape[0], 1))
+    axs[1].set_xticklabels(plot_data.index)
+    axs[1].grid(ls="--", color="lightgrey", linewidth=0.5, axis="y")
     sns.despine()
     f.savefig(Dirs.figures.value / "excess heatwaves person days.png")
     plt.show()
@@ -861,10 +877,26 @@ def plot_heatwave_exposure():
         .unstack()
         .T.loc["exposures"]
     )
-    (plot_data.LT_1 / 1e6).plot.bar(ax=axs[0])
+    plot_data_inf = plot_data.LT_1 / 1e6
+    plot_data_inf_baseline = plot_data_inf[
+        plot_data_inf.index <= Variables.year_reference_end.value
+    ]
+    plot_data_inf.plot.bar(ax=axs[0])
+    plot_data_inf_baseline.plot.bar(ax=axs[0], color="lightblue")
     axs[0].set(title="Infants", ylabel="", xlabel="Year")
-    (plot_data.GT_65 / 1e6).plot.bar(ax=axs[1])
+    axs[0].grid(ls="--", color="lightgrey", linewidth=0.5, axis="y")
+
+    plot_data_old = plot_data.GT_65 / 1e6
+    plot_data_old_baseline = plot_data_old[
+        plot_data_old.index <= Variables.year_reference_end.value
+    ]
+    plot_data_old.plot.bar(ax=axs[1])
+    plot_data_old_baseline.plot.bar(ax=axs[1], color="lightblue")
     axs[1].set(title="Over 65", ylabel="", xlabel="Year")
+    axs[1].set_xlim(-0.5, plot_data.shape[0] + 0.5)
+    axs[1].set_xticks(np.arange(0, plot_data.shape[0], 1))
+    axs[1].set_xticklabels(plot_data.index)
+    axs[1].grid(ls="--", color="lightgrey", linewidth=0.5, axis="y")
     plt.tight_layout(rect=(0.02, 0, 1, 1))
     f.text(
         0.01, 0.5, "Heatwave person-days [million]", va="center", rotation="vertical"
@@ -1654,7 +1686,6 @@ def main_results():
     )
     print(nuts_pct_change_days.T.describe())
 
-    # todo the data for older adults and infants are the same
     nuts_pct_change_days.T["LT_1"].replace([np.inf, -np.inf], np.nan).plot.hist()
     plt.show()
     nuts_pct_change_days.T["GT_65"].replace([np.inf, -np.inf], np.nan).plot.hist()
@@ -1721,7 +1752,7 @@ def main_results():
         [
             (
                 heatwave_days_eu.mean(dim=["latitude", "longitude"])
-                .sel(year=slice(2000, None))
+                .sel(year=slice(Variables.year_reference_start.value, None))
                 .to_dataframe()
                 .assign(age_band="European average")
                 .reset_index()
@@ -1804,16 +1835,17 @@ def main_results():
     # decade_change_sum.mean(dim=["latitude", "longitude"])
     # decade_change_sum.quantile(0.95, dim=["latitude", "longitude"])
 
-    def plot_heatwave_exposure(plot_data, description_data):
+    def _plot_heatwave_exposure(plot_data, description_data):
         f = plt.figure()
         ax = plt.axes(projection=ccrs.epsg(3035), frameon=False)
 
         plot_data = plot_data.where(raster_nuts_grid > 0)
 
         plot_data.plot.pcolormesh(
-            norm=colors.CenteredNorm(),
-            vmax=250,
-            cmap="RdBu_r",
+            # norm=colors.CenteredNorm(),
+            vmax=600,
+            vmin=0,
+            cmap="Reds",
             ax=ax,
             cbar_kwargs={"label": "% change"},
             transform=ccrs.PlateCarree(),
@@ -1822,29 +1854,30 @@ def main_results():
         ax.add_feature(cartopy.feature.BORDERS, color="grey", linewidth=0.5)
         ax.spines["geo"].set_visible(False)
 
-        ax.set(
-            title=description_data
-            + "\n"
-            + f"{Variables.year_min_comparison.value}-{Variables.year_max_comparison.value} "
-            f"compared to {Variables.year_reference_start.value}-{Variables.year_reference_end.value}"
-        )
+        # ax.set(
+        #     title=description_data
+        #     + "\n"
+        #     + f"{Variables.year_min_comparison.value}-{Variables.year_max_comparison.value} "
+        #     f"compared to {Variables.year_reference_start.value}-{Variables.year_reference_end.value}"
+        # )
+        ax.set_title("")
         plt.tight_layout()
         filename = "_".join([x.lower() for x in description_data.split(" ")])
         f.savefig(Dirs.figures.value / f"{filename}.png", dpi=600)
         plt.show()
 
     # Usage
-    plot_heatwave_exposure(
+    _plot_heatwave_exposure(
         plot_data=decade_change.sum(dim="age_band"),
         description_data="Decadal change in heatwave exposure",
     )
 
-    plot_heatwave_exposure(
+    _plot_heatwave_exposure(
         plot_data=decade_change.sel(age_band="GT_65"),
         description_data=f"Decadal change in heatwave exposure of over 65",
     )
 
-    plot_heatwave_exposure(
+    _plot_heatwave_exposure(
         plot_data=decade_change.sel(age_band="LT_1"),
         description_data=f"Decadal change in heatwave exposure of infants",
     )
@@ -1860,9 +1893,9 @@ if __name__ == "__process__":
     nuts2_id_as_int()  # fast
     re_grid_population()  # slow
     demographics_gpw_nuts_weighted()  # slow
-    calculate_infants()
-    calculate_heatwaves_exposure()
-    calculate_exposures_nuts_2021()
+    calculate_infants()  # medium
+    calculate_heatwaves_exposure()  # fast
+    calculate_exposures_nuts_2021()  # slow
 
     # plots and summaries
     calc_normed_exposure_eu_level()
